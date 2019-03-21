@@ -6,6 +6,7 @@ import ast
 
 class Everytweet:
 
+
     # Error handler
     #----------------------------------------------------------------------------
     
@@ -53,28 +54,42 @@ class Everytweet:
         except AttributeError:
             self.log_err("invalid tweet.")
 
+
     # tweet manifest parsing
     #---------------------------------------------------------------------------- 
 
     def gen_manifest(self):
         self.log_notify("building tweet manifest...")
-        self.log_notify("please choose a dictionary:\n")
-        
-        i = 0
-        self.dicts = glob.glob(self.dict_dir + "*.txt")
-        while i < len(self.dicts):
-            print("[{}] {}".format(i, self.dicts[i].split("\\")[1]))
-            i = i + 1
+
+        tweet_dict = open(self.dict, 'r')
+        manifest = open(self.tweet_manifest, 'w')
+        try:
+            with tweet_dict as f:
+                for line in f:
+                    a = self.modifier + line
+                    manifest.write(a)
+                    
+        except FileNotFoundError:
+            self.log_err("dictionary not found.")
+            sys.exit()
+        except:
+            self.log_err("could not build manifest.")
+            sys.exit()
+                
+        self.log_notify("successfully built manifest.")
+        return open(self.tweet_manifest, 'r')  
         
     def load_manifest(self):
-
+        self.log_notify("loading tweet manifest...")
+        
         try:
-            self.log_notify("loading existing tweet manifest...")
-            self.tweet_manifest = open('tweet_manifest_dir', 'r')
+            self.tweet_manifest = open(self.tweet_manifest, 'r')
         except FileNotFoundError:
             self.log_notify("..Existing manifest not found.")
             self.tweet_manifest = self.gen_manifest()
 
+    
+    
     # main
     #----------------------------------------------------------------------------
     def run(self):
@@ -82,12 +97,9 @@ class Everytweet:
         self.transcripts = self.load_manifest()
 
 
-          
-        # generate a tweet from the text model
-        #self.gen_tweet()
 
         # get auth
-        #self.get_api()
+        self.get_api()
           
         # send generated tweet
         #self.publish_status()
@@ -103,10 +115,9 @@ class Everytweet:
         self.warn_log_file = "./everytweet.log"
         self.err_log_file = "./everytweet.log"
 
-        self.dict_dir = "./dictionaries/"
-        self.tweet_manifest_dir = "./manifest"
+        self.modifier = None
         self.suffix_mode = False
+        
+        self.dict = None
+        self.tweet_manifest = "./manifest"
 
-if __name__ == '__main__':
-    app = Everytweet()
-    app.run()
