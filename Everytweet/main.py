@@ -37,6 +37,7 @@ class Everytweet:
         self.log_notify("..api loaded.")
 
     def publish_status(self):
+        
         try:
             self.log_notify("Sending tweet..")
             if self.tweet.strip():
@@ -59,14 +60,14 @@ class Everytweet:
     #---------------------------------------------------------------------------- 
 
     def gen_manifest(self):
-        self.log_notify("building tweet manifest...")
+        self.log_notify("building tweet manifest..")
 
         tweet_dict = open(self.dict, 'r')
         manifest = open(self.tweet_manifest, 'w')
         try:
             with tweet_dict as f:
                 for line in f:
-                    a = self.modifier + line
+                    a = str(self.prefix + line + self.suffix)
                     manifest.write(a)
                     
         except FileNotFoundError:
@@ -80,7 +81,7 @@ class Everytweet:
         return open(self.tweet_manifest, 'r')  
         
     def load_manifest(self):
-        self.log_notify("loading tweet manifest...")
+        self.log_notify("loading tweet manifest..")
         
         try:
             open(self.tweet_manifest, 'r')
@@ -89,11 +90,13 @@ class Everytweet:
             self.gen_manifest()
 
     def gen_tweet(self):
+        self.log_notify("generating tweet..")
         with open(self.tweet_manifest, 'r') as f:
             self.lines = f.readlines()
             self.tweet = self.lines[0]
-
+    
     def rem_tweeted(self):
+        self.log_notify("deleting tweeted line..")
         with open(self.tweet_manifest, 'w') as f:
             f.writelines(self.lines[1:])
 
@@ -106,13 +109,17 @@ class Everytweet:
         self.transcripts = self.load_manifest()
 
         self.gen_tweet()
+          
+        self.log_notify(str("tweet: {}".format(self.tweet)))
 
         # get auth
         self.get_api()
-          
+
         # send generated tweet
         self.publish_status()
 
+        # delete tweeted line from manifest
+        self.rem_tweeted()
           
     def __init__(self):
         self.api_key ="XXXXXXXXX"
@@ -124,9 +131,9 @@ class Everytweet:
         self.warn_log_file = "./everytweet.log"
         self.err_log_file = "./everytweet.log"
 
-        self.modifier = None
-        self.suffix_mode = False
-        
+        self.prefix = ""
+        self.suffix = ""
+
         self.dict = None
         self.tweet_manifest = "./manifest"
 
