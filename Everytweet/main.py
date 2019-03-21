@@ -83,12 +83,21 @@ class Everytweet:
         self.log_notify("loading tweet manifest...")
         
         try:
-            self.tweet_manifest = open(self.tweet_manifest, 'r')
+            open(self.tweet_manifest, 'r')
         except FileNotFoundError:
             self.log_notify("..Existing manifest not found.")
-            self.tweet_manifest = self.gen_manifest()
+            self.gen_manifest()
 
-    
+    def gen_tweet(self):
+        with open(self.tweet_manifest, 'r') as f:
+            self.lines = f.readlines()
+            self.tweet = self.lines[0]
+
+    def rem_tweeted(self):
+        with open(self.tweet_manifest, 'w') as f:
+            f.writelines(self.lines[1:])
+
+
     
     # main
     #----------------------------------------------------------------------------
@@ -96,13 +105,13 @@ class Everytweet:
         # load manifest
         self.transcripts = self.load_manifest()
 
-
+        self.gen_tweet()
 
         # get auth
         self.get_api()
           
         # send generated tweet
-        #self.publish_status()
+        self.publish_status()
 
           
     def __init__(self):
