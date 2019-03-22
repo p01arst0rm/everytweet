@@ -63,12 +63,14 @@ class Everytweet:
         self.log_notify("building tweet manifest..")
 
         tweet_dict = open(self.dict, 'r')
+        a = tweet_dict.readline()
         manifest = open(self.tweet_manifest, 'w')
         try:
             with tweet_dict as f:
-                for line in f:
-                    a = str(self.prefix + line + self.suffix)
+                while a:
+                    a = str(self.prefix + a + self.suffix)
                     manifest.write(a)
+                    a = tweet_dict.readline()
                     
         except FileNotFoundError:
             self.log_err("dictionary not found.")
