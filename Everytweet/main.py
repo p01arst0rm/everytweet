@@ -2,7 +2,7 @@ import sys
 import glob
 import tweepy
 import ast
-
+import codecs
 
 class Everytweet:
 
@@ -12,7 +12,7 @@ class Everytweet:
     
     def log_handle(self, log, log_file):
         print(log)
-        with open(log_file, "a") as x:
+        with codecs.open(log_file, "a", encoding='utf8') as x:
             x.write(log + "\n")
            
     def log_notify(self, notif):
@@ -62,17 +62,13 @@ class Everytweet:
     def gen_manifest(self):
         self.log_notify("building tweet manifest..")
 
-        tweet_dict = open(self.dict, 'r')
-        manifest = open(self.tweet_manifest, 'w')
-        while True:
+        tweet_dict = codecs.open(self.dict, 'r', encoding='utf8').readlines()
+        manifest = codecs.open(self.tweet_manifest, 'w', encoding='utf8')
+        
+        for line in tweet_dict:
             try:
-                a = tweet_dict.readline()
-                if a:
-                    a = str(self.prefix + a + self.suffix)
-                    manifest.write(a)
-                    a = tweet_dict.readline()
-                else:
-                    break
+                a = self.prefix + line + self.suffix
+                manifest.write(a)
 
             except FileNotFoundError:
                 self.log_err("dictionary not found.")
@@ -87,35 +83,35 @@ class Everytweet:
                 sys.exit()
                 
         self.log_notify("successfully built manifest.")
-        return open(self.tweet_manifest, 'r')  
         
     def load_manifest(self):
         self.log_notify("loading tweet manifest..")
         
         try:
-            open(self.tweet_manifest, 'r')
+            codecs.open(self.tweet_manifest, 'r', encoding='utf8')
         except FileNotFoundError:
             self.log_notify("..Existing manifest not found.")
             self.gen_manifest()
 
     def gen_tweet(self):
         self.log_notify("generating tweet..")
-        with open(self.tweet_manifest, 'r') as f:
+        with codecs.open(self.tweet_manifest, 'r', encoding='utf8') as f:
             self.lines = f.readlines()
             self.tweet = self.lines[0]
     
     def rem_tweeted(self):
         self.log_notify("deleting tweeted line..")
-        with open(self.tweet_manifest, 'w') as f:
-            f.writelines(self.lines[1:])
-
+        manifest = codecs.open(self.tweet_manifest, 'w', encoding='utf8')
+        del self.lines[0]
+        for line in self.lines:
+            manifest.write(str(line))
 
     
     # main
     #----------------------------------------------------------------------------
     def run(self):
         # load manifest
-        self.transcripts = self.load_manifest()
+        self.load_manifest()
 
         self.gen_tweet()
           
@@ -145,4 +141,3 @@ class Everytweet:
 
         self.dict = None
         self.tweet_manifest = "./manifest"
-
