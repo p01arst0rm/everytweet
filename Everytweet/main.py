@@ -10,7 +10,6 @@ class Everytweet:
 
     # Error handler
     #----------------------------------------------------------------------------
-    
     def log_handle(self, log, log_file):
         print(log)
         with codecs.open(log_file, "a", encoding='utf8') as x:
@@ -29,7 +28,6 @@ class Everytweet:
            
     # Twitter handler
     #----------------------------------------------------------------------------
-    
     def get_api(self):
         self.log_notify("Loading api..")
         auth = tweepy.OAuthHandler(self.api_key, self.api_key_secret)
@@ -59,8 +57,6 @@ class Everytweet:
 
     # tweet manifest parsing
     #---------------------------------------------------------------------------- 
- 
-
     def gen_manifest(self):
         self.log_notify("..Existing manifest not found.")
         dict_list = glob.glob(str(self.dict_path))
@@ -69,7 +65,7 @@ class Everytweet:
             self.log_notify("building {}".format(f))
             
             dict_file = codecs.open(f, 'r', encoding='utf8').readlines()      
-            manifest_dir =  self.tweet_manifest +"\\"+ f.split("\\")[-1]
+            manifest_dir =  self.manifest_dir +"\\"+ f.split("\\")[-1]
             manifest_file = codecs.open(manifest_dir , 'w+', encoding='utf8')
             
             for line in dict_file:
@@ -92,20 +88,20 @@ class Everytweet:
         self.log_notify("loading tweet manifest..")
 
         # does a __manifest__ file exist? remove it.
-        if os.path.isfile(self.tweet_manifest):
-            os.remove(self.tweet_manifest)
+        if os.path.isfile(self.manifest_dir):
+            os.remove(self.manifest_dir)
             self.gen_manifest()
         
         # does a __manifest__ dir exist? add one.
-        if not os.path.isdir(self.tweet_manifest):
-            os.mkdir(self.tweet_manifest)
+        if not os.path.isdir(self.manifest_dir):
+            os.mkdir(self.manifest_dir)
             self.gen_manifest()
         
         # is __manifest__ empty? build manifest.
-        if glob.glob(str(self.tweet_manifest+"\\*")) == []:
+        if glob.glob(str(self.manifest_dir+"\\*")) == []:
             self.gen_manifest()
 
-        self.manifest_files = glob.glob(str(self.tweet_manifest+"\\*"))
+        self.manifest_files = glob.glob(str(self.manifest_dir+"\\*"))
 
     def gen_tweet(self):
         while True:
@@ -155,7 +151,6 @@ class Everytweet:
         self.access_token = "XXXXXXXXX"    
         self.access_token_secret = "XXXXXXXXX"
 
-        self.dict_path = ""
         self.notify_log_file = ".\\everytweet.log"
         self.warn_log_file = ".\\everytweet.log"
         self.err_log_file = ".\\everytweet.log"
@@ -163,5 +158,5 @@ class Everytweet:
         self.prefix = ""
         self.suffix = ""
 
-        self.dict = None
-        self.tweet_manifest = ".\\__manifest__"
+        self.dict_path = ""
+        self.manifest_dir = ".\\__manifest__"
