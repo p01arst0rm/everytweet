@@ -5,6 +5,8 @@ app =Everytweet()
 app.dict_path = "./dictionaries/*"
 #app.dict_path = "./dictionaries/english.txt"
 
+app.prefix = "did you know that "
+app.suffix = " is an english word?"
 
 app.api_key ="XXXXXXXXXXXXXXXXXXXXXXXXX"        
 app.api_key_secret = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"

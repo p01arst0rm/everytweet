@@ -64,7 +64,7 @@ class Everytweet:
     def gen_manifest(self):
         self.log_notify("..Existing manifest not found.")
         dict_list = glob.glob(str(self.dict_path))
-        
+
         for f in dict_list:
             self.log_notify("building {}".format(f))
             
@@ -113,7 +113,7 @@ class Everytweet:
                 self.log_notify("fetching tweet..")
                 with codecs.open(self.manifest_files[0], 'r', encoding='utf8') as f:
                     self.lines = f.readlines()
-                    self.tweet = self.lines[0]
+                    self.tweet = str(self.prefix + self.lines[0].rstrip() + self.suffix)
                     break
             except IndexError:
                 self.log_warn("manifest file invalid!")
