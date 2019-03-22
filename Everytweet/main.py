@@ -63,21 +63,28 @@ class Everytweet:
         self.log_notify("building tweet manifest..")
 
         tweet_dict = open(self.dict, 'r')
-        a = tweet_dict.readline()
         manifest = open(self.tweet_manifest, 'w')
-        try:
-            with tweet_dict as f:
-                while a:
+        while True:
+            try:
+                a = tweet_dict.readline()
+                if a:
                     a = str(self.prefix + a + self.suffix)
                     manifest.write(a)
                     a = tweet_dict.readline()
-                    
-        except FileNotFoundError:
-            self.log_err("dictionary not found.")
-            sys.exit()
-        except:
-            self.log_err("could not build manifest.")
-            sys.exit()
+                else:
+                    break
+
+            except FileNotFoundError:
+                self.log_err("dictionary not found.")
+                sys.exit()
+            
+            except UnicodeDecodeError:
+                self.log_warn("could not decode line")
+                pass
+            
+            except:
+                self.log_err("could not build manifest.")
+                sys.exit()
                 
         self.log_notify("successfully built manifest.")
         return open(self.tweet_manifest, 'r')  
