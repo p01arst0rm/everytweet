@@ -107,8 +107,8 @@ class Everytweet:
             try:
                 self.log_notify("fetching tweet..")
                 with codecs.open(Path(self.manifest_list[0]), 'r', encoding='utf8') as f:
-                    self.lines = f.readlines()
-                    self.tweet = str(self.prefix + self.lines[0].rstrip() + self.suffix)
+                    self.line = f.readline()
+                    self.tweet = str(self.prefix + self.line.rstrip() + self.suffix)
                     break
             except IndexError:
                 self.log_warn("manifest file invalid!")
@@ -117,12 +117,17 @@ class Everytweet:
 
     def rem_tweeted(self):
         self.log_notify("deleting tweeted line..")
-        manifest = codecs.open(Path(self.manifest_list[0]), 'w', encoding='utf8')
-        del self.lines[0]
-        for line in self.lines:
-            manifest.write(str(line))
-
-
+        manifest = codecs.open(Path(self.manifest_list[0]), 'r', encoding='utf8')
+        manifest_temp = codecs.open(Path(self.manifest_list[0]+".tmp"), 'w', encoding='utf8')
+        line = manifest.readline()
+        while line:
+            line = manifest.readline()
+            manifest_temp.write(str(line))
+        manifest.close()
+        manifest_temp.close()
+        os.remove(Path(self.manifest_list[0]))
+        Path(self.manifest_list[0]+".tmp").replace(Path(self.manifest_list[0]))
+        
     # main
     #----------------------------------------------------------------------------
     def run(self):
@@ -139,7 +144,7 @@ class Everytweet:
         self.get_api()
 
         # send generated tweet
-        #self.publish_status()
+        self.publish_status()
 
         # delete tweeted line from manifest
         self.rem_tweeted()
