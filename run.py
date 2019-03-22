@@ -2,8 +2,8 @@ from Everytweet import Everytweet
 
 app =Everytweet()
 
-#app.dict_path = "./dictionaries/*"
-app.dict_path = "./dictionaries/english.txt"
+app.dict_path = "./dictionaries/*"
+#app.dict_path = "./dictionaries/english.txt"
 
 
 app.api_key ="XXXXXXXXXXXXXXXXXXXXXXXXX"        
