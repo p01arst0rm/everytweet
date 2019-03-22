@@ -61,27 +61,32 @@ class Everytweet:
 
     def gen_manifest(self):
         self.log_notify("building tweet manifest..")
-
-        tweet_dict = codecs.open(self.dict, 'r', encoding='utf8').readlines()
-        manifest = codecs.open(self.tweet_manifest, 'w', encoding='utf8')
         
-        for line in tweet_dict:
-            try:
-                a = self.prefix + line + self.suffix
-                manifest.write(a)
+        dict_list = glob.glob(str(self.dict_path))
+        print(dict_list)
 
-            except FileNotFoundError:
-                self.log_err("dictionary not found.")
-                sys.exit()
+        for f in dict_list:
+            tweet_dict = codecs.open(f, 'r', encoding='utf8').readlines()
+            print(type(tweet_dict))
+            manifest = codecs.open(self.tweet_manifest, 'a+', encoding='utf8')
             
-            except UnicodeDecodeError:
-                self.log_warn("could not decode line")
-                pass
-            
-            except:
-                self.log_err("could not build manifest.")
-                sys.exit()
+            for line in tweet_dict:
+                try:
+                    a = self.prefix + line + self.suffix
+                    manifest.write(a)
+
+                except FileNotFoundError:
+                    self.log_err("dictionary not found.")
+                    sys.exit()
                 
+                except UnicodeDecodeError:
+                    self.log_warn("could not decode line")
+                    pass
+                
+                except:
+                    self.log_err("could not build manifest.")
+                    sys.exit()
+                    
         self.log_notify("successfully built manifest.")
         
     def load_manifest(self):
@@ -132,6 +137,7 @@ class Everytweet:
         self.access_token = "XXXXXXXXX"    
         self.access_token_secret = "XXXXXXXXX"
 
+        self.dict_path = ""
         self.notify_log_file = "./everytweet.log"
         self.warn_log_file = "./everytweet.log"
         self.err_log_file = "./everytweet.log"
