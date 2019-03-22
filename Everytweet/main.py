@@ -4,6 +4,7 @@ import glob
 import tweepy
 import ast
 import codecs
+from pathlib import Path
 
 class Everytweet:
 
@@ -59,19 +60,19 @@ class Everytweet:
     #---------------------------------------------------------------------------- 
     def gen_manifest(self):
         self.log_notify("..Existing manifest not found.")
-        dict_list = glob.glob(str(self.dict_path))
-
+        dict_list = glob.glob(str(Path(self.dict_path)))
+        print(dict_list)
         for f in dict_list:
-            self.log_notify("building {}".format(f))
-            
-            dict_file = codecs.open(f, 'r', encoding='utf8').readlines()      
-            manifest_dir =  self.manifest_dir +"\\"+ f.split("\\")[-1]
+            x = Path(f)
+            self.log_notify("building {}..".format(x))
+
+            manifest_dir = Path(self.manifest_path) / x.name            
+            dict_file = codecs.open(x, 'r', encoding='utf8').readlines()     
             manifest_file = codecs.open(manifest_dir , 'w+', encoding='utf8')
             
             for line in dict_file:
                 try:
-                    a = self.prefix + line + self.suffix
-                    manifest_file.write(a)
+                    manifest_file.write(line)
                 except FileNotFoundError:
                     self.log_err("dictionary not found.")
                     sys.exit()
@@ -82,43 +83,41 @@ class Everytweet:
                     self.log_err("could not build manifest.")
                     sys.exit()
                     
-        self.log_notify("successfully built manifest.")
-        
     def load_manifest(self):
         self.log_notify("loading tweet manifest..")
-
-        # does a __manifest__ file exist? remove it.
-        if os.path.isfile(self.manifest_dir):
-            os.remove(self.manifest_dir)
-            self.gen_manifest()
         
-        # does a __manifest__ dir exist? add one.
-        if not os.path.isdir(self.manifest_dir):
-            os.mkdir(self.manifest_dir)
+        # does a __manifest__ dir exist?
+        if not Path(self.manifest_path).is_dir():
+            # does a __manifest__ file exist?
+            if Path(self.manifest_path).is_file():
+                os.remove(Path(self.manifest_path))
+            os.mkdir(Path(self.manifest_path))
             self.gen_manifest()
         
         # is __manifest__ empty? build manifest.
-        if glob.glob(str(self.manifest_dir+"\\*")) == []:
+        if glob.glob(str(Path(self.manifest_path + "/*"))) == []:
             self.gen_manifest()
+        
+        # get all manifest files
+        self.manifest_list = glob.glob(str(Path(self.manifest_path + "/*")))
 
-        self.manifest_files = glob.glob(str(self.manifest_dir+"\\*"))
 
     def gen_tweet(self):
         while True:
             try:
                 self.log_notify("fetching tweet..")
-                with codecs.open(self.manifest_files[0], 'r', encoding='utf8') as f:
+                with codecs.open(Path(self.manifest_list[0]), 'r', encoding='utf8') as f:
                     self.lines = f.readlines()
                     self.tweet = str(self.prefix + self.lines[0].rstrip() + self.suffix)
                     break
             except IndexError:
                 self.log_warn("manifest file invalid!")
-                os.remove(self.manifest_files[0])
+                os.remove(Path(self.manifest_list[0]))
                 self.load_manifest()
 
     def rem_tweeted(self):
         self.log_notify("deleting tweeted line..")
-        manifest = codecs.open(self.manifest_files[0], 'w', encoding='utf8')
+        manifest = codecs.open(Path(self.manifest_list[0]), 'w', encoding='utf8')
         del self.lines[0]
         for line in self.lines:
             manifest.write(str(line))
@@ -140,7 +139,7 @@ class Everytweet:
         self.get_api()
 
         # send generated tweet
-        self.publish_status()
+        #self.publish_status()
 
         # delete tweeted line from manifest
         self.rem_tweeted()
@@ -151,12 +150,14 @@ class Everytweet:
         self.access_token = "XXXXXXXXX"    
         self.access_token_secret = "XXXXXXXXX"
 
-        self.notify_log_file = ".\\everytweet.log"
-        self.warn_log_file = ".\\everytweet.log"
-        self.err_log_file = ".\\everytweet.log"
+        self.notify_log_file = "./everytweet.log"
+        self.warn_log_file = "./everytweet.log"
+        self.err_log_file = "./everytweet.log"
 
         self.prefix = ""
         self.suffix = ""
 
         self.dict_path = ""
-        self.manifest_dir = ".\\__manifest__"
+        self.dict_list = []
+        self.manifest_path = "./__manifest__"
+        self.manifest_list = []
